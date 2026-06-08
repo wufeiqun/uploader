@@ -26,3 +26,8 @@ cache/
 *.gz
 
 deploy/
+
+# 构建产物
+uploader
+uploader-linux-amd64
+uploader-darwin-arm64
