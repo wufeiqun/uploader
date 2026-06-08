@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"net/http"
 	"path/filepath"
@@ -9,17 +10,15 @@ import (
 )
 
 func main() {
-
-	port := 8080
-	filePath := "/data/uploader"
-	// enableAuth := false
-	// username := "admin"
-	// password := "admin"
+	// 通过命令行参数支持自定义端口和文件存储路径，方便多实例部署
+	port := flag.Int("port", 8080, "监听端口")
+	filePath := flag.String("path", "/data/uploader", "文件存储路径")
+	flag.Parse()
 
 	router := gin.Default()
 	// 文件下载
-	router.StaticFS("/", http.Dir(filePath))
-	
+	router.StaticFS("/", http.Dir(*filePath))
+
 	// 单文件上传
 	router.POST("/upload", func(c *gin.Context) {
 		// 获取上传的文件
@@ -30,7 +29,7 @@ func main() {
 		}
 
 		// 设置保存路径
-		dst := filepath.Join(filePath, file.Filename)
+		dst := filepath.Join(*filePath, file.Filename)
 
 		// 保存文件到服务器
 		if err := c.SaveUploadedFile(file, dst); err != nil {
@@ -50,7 +49,7 @@ func main() {
 		var uploadedFiles []string
 
 		for _, file := range files {
-			dst := filepath.Join(filePath, file.Filename)
+			dst := filepath.Join(*filePath, file.Filename)
 			if err := c.SaveUploadedFile(file, dst); err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "保存文件失败"})
 				return
@@ -60,6 +59,7 @@ func main() {
 
 		c.JSON(http.StatusOK, gin.H{"message": "上传成功", "files": uploadedFiles})
 	})
-	router.Run(":" + fmt.Sprint(port))
-	fmt.Println("Server started on port", port)
+
+	fmt.Printf("Server started on port %d, file path: %s\n", *port, *filePath)
+	router.Run(":" + fmt.Sprint(*port))
 }

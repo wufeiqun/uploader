@@ -10,7 +10,21 @@
 
 * 命令行启动
 
-`./uploader`
+```bash
+# 使用默认值（端口 8080，存储路径 /data/uploader）
+./uploader
+
+# 自定义端口和文件存储路径
+./uploader -port 9090 -path /tmp/files
+
+# 查看所有参数
+./uploader -h
+```
+
+| 参数 | 默认值 | 说明 |
+|------|--------|------|
+| `-port` | `8080` | 监听端口 |
+| `-path` | `/data/uploader` | 文件存储路径 |
 
 * systemd启动
 
@@ -24,7 +38,7 @@ After=network.target
 [Service]
 Type=simple
 
-ExecStart=/data/server/uploader/uploader
+ExecStart=/data/server/uploader/uploader -port 8080 -path /data/uploader
 
 LimitNOFILE=65536
 
